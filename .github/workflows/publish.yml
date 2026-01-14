@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+      - main
     tags:
       - "*"
   pull_request:
@@ -38,7 +39,7 @@ jobs:
           to: html
 
       - name: Publish to GH Pages
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           target: gh-pages # The branch the action should deploy to.
