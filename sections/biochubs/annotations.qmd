@@ -1,0 +1,81 @@
+---
+title: "Accessing Annotations"
+---
+
+
+# Gene Models and Identifiers
+
+Genomic analysis often requires mapping between identifiers (e.g., Ensembl to Symbol) or retrieving gene coordinates. BiocPy interfaces with Bioconductor's standard annotation packages through the `genomicfeatures` and `sqlite3` interfaces.
+
+## TxDb: Transcript Databases
+
+The `genomicfeatures` package allows interaction with TxDb objects, which store gene models (exons, transcripts, CDS) and their relationships.
+
+### Loading a TxDb
+
+You can load a TxDb from a standard SQLite file. These files can often be downloaded via `ExperimentHub` or `AnnotationHub`.
+
+```{python}
+#| eval: false
+import genomicfeatures as gf
+
+# Load a TxDb from an SQLite file
+# In practice, you might download this file first
+txdb_path = "TxDb.Hsapiens.UCSC.hg38.knownGene.sqlite"
+txdb = gf.TxDb(txdb_path)
+```
+
+### Retrieving Features
+
+Once loaded, you can extract genomic features as `GenomicRanges` or `GenomicRangesList` objects.
+
+```{python}
+#| eval: false
+# Retrieve all genes as a GenomicRanges object
+all_genes = txdb.genes()
+print(f"Number of genes: {len(all_genes)}")
+
+# Retrieve transcripts
+all_transcripts = txdb.transcripts()
+
+# Retrieve exons grouped by transcript ID (returns a GenomicRangesList-like structure)
+exons_by_tx = txdb.exons_by(by="tx", use_names=True)
+```
+
+## OrgDb: Organism Databases
+
+OrgDb packages provide mappings between different gene identifiers (e.g., Entrez, Ensembl, Uniprot, Symbol) and other annotations like GO terms.
+
+While dedicated Python classes are being developed, direct interaction with the underlying SQLite database using `sqlite3` and `pandas` is a robust and flexible method.
+
+### querying with SQL
+
+```{python}
+#| eval: false
+import sqlite3
+import pandas as pd
+
+# Connect to an OrgDb SQLite file
+con = sqlite3.connect("org.Hs.eg.db.sqlite")
+
+# List available tables to understand the schema
+tables = pd.read_sql("SELECT name FROM sqlite_master WHERE type='table';", con)
+print(tables.head())
+
+# Perform a join to map Symbols to Gene Names
+query = """
+SELECT 
+    genes.symbol, 
+    gene_info.gene_name 
+FROM genes 
+JOIN gene_info ON genes._id = gene_info._id
+WHERE genes.symbol IN ('TP53', 'BRCA1')
+"""
+df = pd.read_sql(query, con)
+print(df)
+```
+
+## See Also
+
+*   [genomicfeatures documentation](https://github.com/BiocPy/genomicfeatures)
+*   [Bioconductor AnnotationData](https://bioconductor.org/packages/release/BiocViews.html#___AnnotationData)

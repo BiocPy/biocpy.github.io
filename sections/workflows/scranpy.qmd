@@ -1,0 +1,94 @@
+---
+title: "Single-Cell Analysis"
+---
+
+
+
+# Analysis with scranpy
+
+`scranpy` provides Python bindings to the high-performance `libscran` C++ library. It offers a complete analysis workflow for single-cell data, often significantly faster than pure Python implementations.
+
+## Identical Statistical Transformations
+
+Because `scranpy` binds to the same C++ `libscran` library used by the R/Bioconductor packages `scran` and `scrapper`, your analysis is guaranteed to be statistically identical to an equivalent R workflow.
+
+This means you can collaborate with teams using different languages without worrying about subtle algorithmic differences between implementations.
+
+
+## The Analysis Pipeline
+
+A typical single-cell analysis workflow involves several key steps:
+
+```{mermaid}
+flowchart LR
+    A[Raw Counts] --> B[Normalization]
+    B --> C[Feature Selection]
+    C --> D[PCA]
+    D --> E[Clustering]
+    D --> F[UMAP/tSNE]
+    E --> G[Marker Detection]
+```
+
+### 1. Normalization & Log-Transformation
+
+Remove library size biases. `scranpy` handles size factor calculation internally if needed.
+
+```{python}
+#| eval: false
+import scranpy
+from scranpy import run_pca, cluster_snn_graph
+
+# Assume 'sce' is a SingleCellExperiment with raw counts
+normalized = scranpy.log_norm_counts(sce)
+```
+
+### 2. Feature Selection
+
+Identify highly variable genes (HVGs) to drive downstream analysis.
+
+```{python}
+#| eval: false
+# Model Gene Variance
+var_stats = scranpy.model_gene_var(normalized)
+hvgs = var_stats.get_top_features(n=2000)
+```
+
+### 3. Dimensionality Reduction (PCA)
+
+Compress the data into the top principal components.
+
+```{python}
+#| eval: false
+# Run PCA on the HVGs
+pca_res = run_pca(normalized, subset_row=hvgs, n_components=25)
+
+# Store PCA back in the SCE container for visualization or other tools
+sce.reduced_dims["PCA"] = pca_res.components
+```
+
+### 4. Clustering
+
+Group cells with similar profiles using graph-based clustering.
+
+```{python}
+#| eval: false
+# Build a Shared Nearest Neighbor (SNN) graph and cluster
+graph = scranpy.build_snn_graph(pca_res.components)
+clusters = scranpy.cluster_graph(graph)
+
+# Store clusters in column data
+sce.column_data["cluster"] = clusters.membership
+```
+
+## Marker Detection
+
+Once clusters are defined, you can identify marker genes that distinguish each cluster.
+
+```{python}
+#| eval: false
+markers = scranpy.score_markers(normalized, groups=clusters.membership)
+
+# Inspect markers for Cluster 1
+c1_markers = markers.get_markers_for_group("1")
+print(c1_markers.head())
+```

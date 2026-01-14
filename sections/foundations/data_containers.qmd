@@ -1,0 +1,119 @@
+---
+title: "Data Containers"
+---
+
+
+
+# SummarizedExperiment & SingleCellExperiment
+
+BiocPy provides standardized containers to keep your data matrix, feature metadata (genes), and sample metadata (cells) in sync during slicing and subsetting.
+
+## Why not just use Pandas?
+
+While Pandas is excellent for tabular data, genomic experiments often involve three distinct but related dimensions:
+1.  **Assay Data:** The actual measurements (counts, methylation beta values).
+2.  **Sample Metadata:** Information about the biological samples (treatment, age, sex).
+3.  **Feature Metadata:** Information about the genomic features (gene lengths, genomic coordinates).
+
+In a simple `DataFrame`, keeping these aligned during subsetting requires manual bookkeeping, which is error-prone. 
+
+BiocPy containers like `SummarizedExperiment` guarantee **synchronization**: if you subset the samples (columns), the assay matrix is sliced automatically. If you subset genes (rows), the feature metadata travels with it.
+
+This design mirrors the **S4 class system** of Bioconductor, ensuring that objects created in Python have the same structural guarantees as those in R.
+
+## SummarizedExperiment (SE)
+
+
+The `SummarizedExperiment` class is designed for matrix-like experiments (e.g., RNA-seq count matrices).
+
+### Structure
+
+Imagine a box with three aligned components:
+1.  **Assays:** One or more matrices (rows=features, cols=samples).
+2.  **Row Data:** Metadata about features (e.g., gene IDs, length).
+3.  **Column Data:** Metadata about samples (e.g., treatment, age).
+
+```{python}
+import numpy as np
+from summarizedexperiment import SummarizedExperiment
+from biocframe import BiocFrame
+
+# 1. The Assay (Data Matrix)
+counts = np.random.poisson(lam=10, size=(100, 4))
+
+# 2. Row Data (Features/Genes)
+row_data = BiocFrame({"gene_id": [f"gene_{i}" for i in range(100)]})
+
+# 3. Column Data (Samples)
+col_data = BiocFrame(
+    {"treatment": ["control", "control", "drug", "drug"]}, 
+    row_names=["s1", "s2", "s3", "s4"]
+)
+
+se = SummarizedExperiment(
+    assays={"counts": counts},
+    row_data=row_data,
+    column_data=col_data
+)
+
+print(se)
+```
+
+### Sychronized Subsetting
+
+Slicing the object automatically slices the matrix and the metadata.
+
+```{python}
+# Select the first 10 genes and the "drug" samples
+subset = se[0:10, se.column_data["treatment"] == "drug"]
+print(subset.shape)
+```
+
+## SingleCellExperiment (SCE)
+
+`SingleCellExperiment` extends SE to support dimensionality reduction embeddings (PCA, UMAP) and alternative experiments (Spike-ins, ADTs).
+
+### Reduced Dimensions
+
+Store embeddings like PCA, t-SNE, or UMAP directly in the object.
+
+```{python}
+from singlecellexperiment import SingleCellExperiment
+
+sce = SingleCellExperiment(
+    assays={"counts": counts},
+    row_data=row_data,
+    column_data=col_data,
+    reduced_dims={"PCA": np.random.rand(4, 2)} # 4 samples, 2 PCs
+)
+
+print(sce.reduced_dims["PCA"])
+```
+
+### Alternative Experiments
+
+You can store distinct experiments (e.g., Spike-ins, Antibody tags) effectively "nested" within the main object, ensuring they are subsetted together.
+
+```{python}
+# Example: Adding a "spike-in" experiment
+spike_counts = np.random.poisson(lam=5, size=(10, 4))
+spike_se = SummarizedExperiment(assays={"counts": spike_counts})
+
+sce.alternative_experiments["spike_ins"] = spike_se
+```
+
+## MultiAssayExperiment (MAE)
+
+For multi-modal data where samples might overlap but aren't identical (e.g., RNA-seq + Mutation calls + Images for a cohort of patients), `MultiAssayExperiment` links multiple experiments together via a `SampleMap`.
+
+```{python}
+#| eval: false
+from multiassayexperiment import MultiAssayExperiment
+
+# (Conceptual example)
+mae = MultiAssayExperiment(
+    experiments={"rna": se, "spike": spike_se},
+    col_data=BiocFrame({"patient_id": ["p1", "p2"]})
+    # sample_map maps patients to samples in each experiment
+)
+```

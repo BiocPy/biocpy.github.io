@@ -1,0 +1,56 @@
+---
+title: "Annotation Workflow"
+---
+
+
+# Automated Cell Type Annotation
+
+Manual annotation of clusters is time-consuming. BiocPy provides tools to map your single-cell data against reference datasets using `celldex` (to fetch references) and `singler` (or compatible implementations).
+
+## Fetching References
+
+
+## Fetching References
+
+The `celldex` package provides access to curated reference datasets (e.g., Blueprint, HPCA). These are stored in **ArtifactDB** format, ensuring efficient, versioned retrieval.
+
+When you fetch a reference, it is `SummarizedExperiment` object where the log-counts are the expression profiles and a column (like `label.main` or `label.fine`) contains the cell type.
+
+
+```{python}
+#| eval: false
+import celldex
+
+# Fetch the Human Primary Cell Atlas reference
+# This data is cached locally via ExperimentHub
+ref = celldex.fetch_reference("hpca")
+print(ref)
+```
+
+## Assigning Labels
+
+You can use `singler` to transfer labels from the reference to your dataset. It calculates correlations between your single cells (or clusters) and the reference samples.
+
+```{python}
+#| eval: false
+import singler
+
+# Run SingleR prediction
+# We use the 'test' dataset (our SCE) and the 'ref' dataset
+predictions = singler.annotate_single(
+    test=sce,
+    ref=ref,
+    labels=ref.column_data["label.main"]
+)
+
+# The result is a DataFrame-like object (BiocFrame)
+# It contains the primary label, scores, and pruning info
+print(predictions.column_names)
+
+# Assign labels to your SingleCellExperiment
+sce.column_data["predicted_label"] = predictions["labels"]
+
+print(sce.column_data["predicted_label"].value_counts())
+```
+
+This workflow enables reproducible, automated cell type identification directly within the Python environment.

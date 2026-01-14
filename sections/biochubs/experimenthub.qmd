@@ -1,0 +1,64 @@
+---
+title: "The Hubs"
+---
+
+
+# ExperimentHub & AnnotationHub
+
+Bioconductor hosts vast amounts of data in the cloud. The hub client packages allow you to discover and cache this data locally in Python.
+
+*   `ExperimentHub`: Designed for experimental data (e.g., recount2, curated datasets).
+*   `AnnotationHub`: Designed for reference annotations (e.g., Ensembl, UCSC).
+
+## ExperimentHub
+
+Use `ExperimentHub` to fetch processed datasets without manually handling URLs or file versions.
+
+```{python}
+#| eval: false
+from experimenthub import ExperimentHub
+
+eh = ExperimentHub()
+
+# Search for specific datasets (e.g., from the 'scRNAseq' package)
+results = eh.search("Zeisel")
+print(f"Found {len(results)} datasets matching 'Zeisel'")
+
+# Load a specific resource by ID
+# This automatically downloads and caches the data
+zeisel_sce = eh.load("EH3215")
+print(zeisel_sce)
+```
+
+## AnnotationHub
+
+`AnnotationHub` works similarly but focuses on genomic annotations.
+
+```{python}
+#| eval: false
+from experimenthub import AnnotationHub
+
+ah = AnnotationHub()
+
+# Search for human TxDbs
+# (Note: Search terms depend on the metadata available in the hub)
+results = ah.search("TxDb")
+print(results[:5]) # Print first 5 results
+```
+
+## Local Caching
+
+Data is cached in your user directory (standard XDG cache). This ensures that subsequent calls to `load` are instantaneous and work offline.
+
+### Managing the Cache
+
+You can inspect the cache location and manually remove files if needed, though the library handles this for you generally.
+
+```{python}
+#| eval: false
+# Check cache location
+print(eh.cache_dir)
+
+# If you need to force a re-download, you can delete the specific file 
+# from this directory, or use force=True in some methods (check API docs).
+```

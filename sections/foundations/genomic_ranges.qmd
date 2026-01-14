@@ -1,0 +1,249 @@
+
+
+# Genomic Ranges
+
+The `GenomicRanges` package provides data structures for representing and manipulating genomic intervals. 
+It is the cornerstone of the BiocPy ecosystem, allowing you to assign genomic coordinates (chromosome, start, end, strand) to data.
+
+## The Data Model
+
+At its core, a `GenomicRanges` object is a vector-like container where each element represents a genomic interval. 
+It is built upon simpler primitives.
+
+### 1. IRanges: The Foundation
+
+Before understanding `GenomicRanges`, we must look at `IRanges`. 
+An `IRanges` object represents integer intervals defined by a **start** position and a **width**.
+
+*   **1-based indexing:** BiocPy follows the Bioconductor/R convention for intervals (1-based, closed).
+*   **Closed intervals:** `[start, end]` are both included.
+*   **Relationship:** `end = start + width - 1`.
+
+```{python}
+from iranges import IRanges
+
+# Construct IRanges
+ir = IRanges(start=[1, 10, 20], width=[5, 5, 5])
+
+# Accessors
+print(f"Starts: {ir.start}")
+print(f"Ends:   {ir.end}")
+print(f"Widths: {ir.width}")
+```
+
+### 2. GenomicRanges: Adding Context
+
+An `IRanges` tells you *where* (coordinate-wise), but not *on what* (chromosome/sequence). `GenomicRanges` extends `IRanges` by adding:
+
+*   **Seqnames:** The chromosome or scaffold name (e.g., "chr1").
+*   **Strand:** The direction of the feature (`+`, `-`, or `*`).
+*   **Metadata (mcols):** Arbitrary annotations like scores, gene IDs, or names.
+
+```{mermaid}
+classDiagram
+    class GenomicRanges {
+        +seqnames: vector
+        +strand: vector
+        +mcols: DataFrame
+    }
+    class IRanges {
+        +start: vector
+        +width: vector
+    }
+    GenomicRanges *-- IRanges : contains
+```
+
+If you represent regions across a genome, you use `GenomicRanges`. If you represent regions within a single unstranded sequence (like a protein or specific transcript), you might use `IRanges` directly.
+
+## Core Concepts Summary
+
+*   **Seqnames:** "chr1", "chrX", etc.
+*   **Ranges:** The underlying `IRanges` (start, width).
+*   **Strand:** 
+    *   `+` (Forward/Watson)
+    *   `-` (Reverse/Crick)
+    *   `*` (Unstranded/Unknown)
+
+**Metadata:** A `BiocFrame` holding any other data columns aligned to the ranges.
+
+
+---
+
+# Robust Genomic Integration
+
+One of the key advantages of BiocPy is the ability to leverage the vast annotation resources of Bioconductor without managing flat files yourself.
+
+The `txdb` package allows you to query standard Bioconductor `TxDb` SQLite databases and populate `GenomicRanges` objects directly. This bypasses the need to parse error-prone GTF/GFF files and ensures you are working with curated, versioned gene models.
+
+See [Accessing Annotations](../biochubs/annotations.qmd) for more details on `TxDb` usage. By loading these annotations into `GenomicRanges`, you can immediately leverage interval arithmetic for analysis, as shown in the workflow below.
+
+---
+
+
+# Workflow: ChIP-seq Peak Annotation
+
+To demonstrate the power of `GenomicRanges`, let's walk through a common bioinformatics task: **annotating ChIP-seq peaks**. 
+
+**Goal:** Given a set of binding peaks and gene annotations, identify which peaks fall within "promoter" regions (upstream of genes).
+
+## 1. Setup Mock Data
+
+First, we generate mock data representing our "Genes" and our "Peaks".
+
+```{python}
+import numpy as np
+from genomicranges import GenomicRanges
+from iranges import IRanges
+from biocframe import BiocFrame
+
+# --- 1. Create Gene Annotations ---
+# Imagine 5 genes on chr1 and chr2
+genes = GenomicRanges(
+    seqnames=["chr1", "chr1", "chr2", "chr2", "chr2"],
+    ranges=IRanges([1000, 5000, 1000, 4000, 8000], width=[500]*5), # 500bp genes
+    strand=["+", "-", "+", "-", "+"],
+    mcols=BiocFrame({
+        "gene_id": ["Gene_A", "Gene_B", "Gene_C", "Gene_D", "Gene_E"],
+        "type": ["protein_coding"] * 5
+    })
+)
+
+# --- 2. Create ChIP-seq Peaks ---
+# Imagine 6 peaks found by an uncited peak caller
+peaks = GenomicRanges(
+    seqnames=["chr1", "chr1", "chr1", "chr2", "chr2", "chr3"],
+    ranges=IRanges([900, 1200, 4800, 950, 4100, 10000], width=[50]*6), # 50bp peaks
+    strand=["*"] * 6, # Peaks are usually unstranded
+    mcols=BiocFrame({
+        "peak_id": [f"peak_{i}" for i in range(1, 7)],
+        "score": [10.5, 8.2, 15.0, 5.5, 20.1, 3.0]
+    })
+)
+
+print("Genes:\n", genes)
+print("\nPeaks:\n", peaks)
+```
+
+## 2. Defining Promoters
+
+We define a promoter as the region **200bp upstream** of a gene's transcription start site (TSS).
+
+*   For `+` strand genes: Upstream is `start - 200`.
+*   For `-` strand genes: Upstream is `end + 200`.
+
+The `flank()` method handles this strand-aware logic automatically.
+
+```{mermaid}
+graph TD
+    A[Gene (+)] -- flank(start=True) --> B[Promoter]
+    B --> C[Upstream Region]
+    D[Gene (-)] -- flank(start=True) --> E[Promoter]
+    E --> F[Downstream in coordinates\n(Upstream biologically)]
+```
+
+```{python}
+# Define promoters: 200bp upstream of the TSS (start=True)
+promoters = genes.flank(width=200, start=True)
+
+# Add the gene_id to the promoter metadata for tracking
+promoters.mcols["gene_id"] = genes.mcols["gene_id"]
+
+print("Promoters:\n", promoters)
+```
+
+Notice how `Gene_B` (on `chr1`, `-` strand, original range `5000-5499`) has a promoter at `5500-5699`—biologically upstream on the negative strand.
+
+## 3. Finding Overlaps
+
+Now we identify which peaks overlap with these defined promoters.
+
+```{python}
+# Find overlaps: query=peaks, subject=promoters
+hits = peaks.find_overlaps(promoters)
+
+print(hits)
+```
+
+`hits` is a collection of indices indicating matches. We can use these indices to extract the matching records.
+
+## 4. Annotating the Peaks
+
+We can now merge the peak information with the gene information.
+
+```{python}
+# Indices of the overlapping peaks and promoters
+peak_indices = hits.get_column("query_hits")
+promoter_indices = hits.get_column("self_hits")
+
+# Extract the actual objects
+overlapping_peaks = peaks[peak_indices]
+overlapping_promoters = promoters[promoter_indices]
+
+# Create a summary result
+result = BiocFrame({
+    "peak_id": overlapping_peaks.mcols["peak_id"],
+    "score": overlapping_peaks.mcols["score"],
+    "overlaps_gene": overlapping_promoters.mcols["gene_id"],
+    "promoter_loc": list(str(x) for x in overlapping_promoters)
+})
+
+print("Annotated Peaks:\n", result)
+```
+
+## 5. Statistical Summary
+
+How many peaks fell into promoters vs intergenic regions?
+
+```{python}
+total_peaks = len(peaks)
+annotated_count = len(set(peak_indices)) # Use set to count unique peaks
+intergenic_count = total_peaks - annotated_count
+
+import pandas as pd
+df = pd.DataFrame({
+    "Category": ["Promoter", "Intergenic"],
+    "Count": [annotated_count, intergenic_count]
+})
+print(df)
+```
+
+---
+
+# Advanced Operations
+
+## Nearest Neighbors
+
+Sometimes a peak doesn't overlap a promoter directly, but you want to know the *closest* gene.
+
+```{python}
+# Find the nearest gene for every peak
+# Returns indices in 'genes' that are closest to each 'peak'
+nearest_inds = genes.nearest(peaks)
+
+print("Nearest Gene Indices:", nearest_inds)
+
+# Add nearest gene info to peaks
+peaks.mcols["nearest_gene"] = [genes.mcols["gene_id"][int(x)] if x is not None else None for x in nearest_inds]
+print("\nPeaks with Nearest Genes:\n", peaks)
+```
+
+## Set Operations
+
+Standard set operations allow you to manipulate genomic territory.
+
+*   `reduce()`: Collapse overlapping regions into single contiguous blocks (e.g., getting total coverage footprint).
+*   `setdiff()`: Subtract regions (e.g., remove blacklisted regions).
+
+```{python}
+# Example: What is the total genomic footprint of our genes?
+footprint = genes.reduce()
+print("Gene Footprint:\n", footprint)
+
+# Example: Remove the promoter regions from the peaks (finding only non-promoter binding)
+non_promoter_peaks = peaks.setdiff(promoters)
+print("\nNon-promoter Binding Sites:\n", non_promoter_peaks)
+```
+
+## Summary
+
+`GenomicRanges` provides a rich grammar for genomic arithmetic. By combining `flank`, `find_overlaps`, `nearest`, and set operations, you can build complex analysis pipelines purely in Python.

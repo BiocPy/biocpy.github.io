@@ -1,0 +1,48 @@
+---
+title: "ArtifactDB"
+---
+
+
+# ArtifactDB: Language Agnostic Storage
+
+[ArtifactDB](https://artifactdb.github.io/) proposes a file-system based format for genomic objects that is readable by both R and Python without complex parsing.
+
+## The Concept
+
+Instead of opaque serialization (like pickle or RDS), ArtifactDB stores objects as directories of standard files:
+*   **Matrices:** Saved as HDF5 or CSV, optimized for large-scale data.
+*   **Metadata:** Saved as JSON files (with strict schemas), ensuring human-readability and validation.
+*   **DataFrames:** Saved as CSV or HDF5.
+
+
+This structure means that a `SummarizedExperiment` saved in Python looks exactly the same on disk as one saved in R.
+
+## Using ArtifactDB in Python
+
+The ecosystem packages—`alabaster` in R and `dolomite` in Python—are manifestations of the exact same schemas and specifications.
+
+*   **R (alabaster):** Save your `SingleCellExperiment` from Bioconductor.
+*   **Python (dolomite):** Load that same directory into a Python `SingleCellExperiment`.
+
+The `dolomite` (saving) and `gypsum` (loading) packages facilitate managing these representations in Python.
+
+
+```{python}
+#| eval: false
+import dolomite.base as dl
+import gypsum
+
+# Save a SingleCellExperiment to disk
+# This creates a directory 'my_dataset_version_1' containing the HDF5/JSON files
+dl.save_object(sce, "my_dataset_version_1")
+
+# Load it back (or load a dataset saved from R)
+# This reconstructs the object in the current environment
+sce_loaded = gypsum.read_object("my_dataset_version_1")
+```
+
+### Why use ArtifactDB?
+
+1.  **Multi-Language Teams:** A team member can process data in R/Bioconductor, save it to ArtifactDB, and another member can immediately load it into Python for machine learning.
+2.  **Long-Term Archival:** Since the format uses standard HDF5 and JSON, the data remains accessible even if specific package versions change.
+3.  **Cloud Native:** The file structure is compatible with object storage (S3, GCS) for hosting large datasets.

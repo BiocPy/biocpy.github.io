@@ -1,0 +1,92 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "BiocPy: Facilitate Bioconductor Workflows in Python",
+    "section": "",
+    "text": "Welcome to BiocPy\nBiocPy is designed to build a bridge between the mature Bioconductor ecosystem and the Python landscape. Bioconductor is an open-source software project that provides tools for the analysis and comprehension of genomic data. One of the main advantages of Bioconductor is the availability of standard data representations and large number of analysis tools tailored for genomic experiments. These data structures allow researchers to seamlessly store, manipulate, and analyze data across multiple packages and workflows in R.\nInspired by Bioconductor, BiocPy aims to facilitate Bioconductor workflows in Python. To achieve this goal, we developed several core data structures that align closely to the Bioconductor implementations. By implementing these core Bioconductor data structures, BiocPy allows data to be easily interoperable between R and Python.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Welcome to BiocPy</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#about-this-book",
+    "href": "index.html#about-this-book",
+    "title": "BiocPy: Facilitate Bioconductor Workflows in Python",
+    "section": "About this Book",
+    "text": "About this Book\nThis book is currently in active development and is organized into the following sections:\n\nFoundations: The core data structures that underpin the ecosystem.\n\nGenomicRanges: Manipulation of genomic intervals.\nData Containers: Rich semantic data containers like SummarizedExperiment.\n\nBioC Hubs: Access to Bioconductor’s cloud resources.\n\nExperimentHub: Discover and download datasets.\nAnnotationHub: Interact with gene models (TxDb) and organism databases (OrgDb).\n\nInteroperability: Tools to bridge R and Python.\n\nR Interoperability: Read R data files (RDS) directly in Python.\nArtifactDB: Language-agnostic storage for genomic data in R and Python.\n\nWorkflows: Real-world usage examples.\n\nSingle-Cell Analysis: Multi-modal single-cell analysis with scranpy.\nAnnotation: Automated cell type annotation with singler.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Welcome to BiocPy</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#further-reading",
+    "href": "index.html#further-reading",
+    "title": "BiocPy: Facilitate Bioconductor Workflows in Python",
+    "section": "Further Reading",
+    "text": "Further Reading\nMany online resources offer detailed information on Bioconductor data structures, namely:\n\nCompGenomR Book\nOrchestrating Single-Cell Analysis with Bioconductor\nOrchestrating Multi-Omics Analysis with Bioconductor\nEPIC-BiocIntro",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Welcome to BiocPy</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html",
+    "href": "sections/packages.html",
+    "title": "BiocPy Packages",
+    "section": "",
+    "text": "Getting Started\nThe BiocPy ecosystem is modular. You can install the collection of core packages via PyPI.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html#getting-started",
+    "href": "sections/packages.html#getting-started",
+    "title": "BiocPy Packages",
+    "section": "",
+    "text": "Installation\nTo get the core data structures and utilities:\npip install biocutils genomicranges summarizedexperiment singlecellexperiment multiassayexperiment\nTo install interoperability tools:\npip install rds2py txdb orgdb experimenthub",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html#core-representations",
+    "href": "sections/packages.html#core-representations",
+    "title": "BiocPy Packages",
+    "section": "Core Representations",
+    "text": "Core Representations\nThese structures serve as essential and foundational data structures, acting as the building blocks for extensive and complex representations.\n\nBiocFrame: A Bioconductor-like data frame class.\nGenomicRanges: Aids in representing genomic regions and facilitating analysis.\n\nContainer classes represent single or multi-omic experimental data and metadata:\n\nSummarizedExperiment: Container class to represent genomic experiments.\nSingleCellExperiment: Container class to represent single-cell experiments.\nMultiAssayExperiment: Container class to represent multiple experiments and assays performed over a set of samples.\n\nMoreover, BiocPy introduces a diverse range of data type classes designed to support the representation of atomic entities, including float, string, int lists, and named lists. These generics and utilities are provided through BiocUtils package, and the delayed and file-backed array operations in the DelayedArray and their derivatives (HDF5Array, TileDbArray).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html#analysis-packages",
+    "href": "sections/packages.html#analysis-packages",
+    "title": "BiocPy Packages",
+    "section": "Analysis Packages",
+    "text": "Analysis Packages\nBiocPy provides bindings to libscran and various other single-cell analysis methods incorporated into the scranpy package to support analysis of multi-modal single-cell datasets. It also features integration with the singler algorithm to annotate cell types by matching cells to known references based on their expression profiles.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html#r-interoperability",
+    "href": "sections/packages.html#r-interoperability",
+    "title": "BiocPy Packages",
+    "section": "R Interoperability",
+    "text": "R Interoperability\nThe rds2py package provides bindings to the rds2cpp library. This enables direct reading of RDS files in Python, eliminating the requirement for additional data conversion tools or intermediate formats. The package’s functionality streamlines the transition between Python and R, facilitating seamless analysis.\nThe following table serves as a directory of the core packages in the BiocPy ecosystem. All packages within the BiocPy ecosystem are published to Python’s Package Index (PyPI).\n\n\n\n\nPackage\nDescription\nLatest Version\nLinks\n\n\n\n\nBiocFrame\nFlexible dataframe representation to support nested structures.\n0.7.2\nGitHub\n\n\nDelayedArray\nDelayed array operations from Bioconductor\n0.6.2\nGitHub\n\n\nGenomicRanges\nContainer class to represent and operate over genomic regions and annotations.\n0.8.3\nGitHub\n\n\nIRanges\nPython implementation of the IRanges Bioconductor package.\n0.7.1\nGitHub\n\n\nMultiAssayExperiment\nContainer class for representing and managing multi-omics genomic experiments\n0.6.0\nGitHub\n\n\nSingleCellExperiment\nContainer class for single-cell experiments\n0.6.2\nGitHub\n\n\nSpatialExperiment\nContainer class for storing data from spatial-omics experiments\n0.1.0\nGitHub\n\n\nSpatialFeatureExperiment\nContainer class for storing data from spatial feature experiments\n0.0.5\nGitHub\n\n\nSummarizedExperiment\nContainer to represent data from genomic experiments\n0.6.5\nGitHub\n\n\nbiocsetup\n“A CLI interface to quickly scaffold new BiocPy Python packages”\n0.3.3\nGitHub\n\n\nbiocutils\nUtilities to use across the biocpy packages.\n0.3.3\nGitHub\n\n\nbiostrings\nEfficient manipulation of genomic sequences\n0.0.2\nGitHub\n\n\ncelldex\nIndex of Reference Cell Type Datasets\n0.3.0\nGitHub\n\n\ncompressed-lists\nMemory-efficient container for list-like objects\n0.4.4\nGitHub\n\n\nexperimenthub\nAccess Bioconductors experimenthub resources\n0.0.1\nGitHub\n\n\nhdf5array\nHDF5-backed objects for array and matrix like data\n0.5.0\nGitHub\n\n\nmopsy\nMatrix operations for numpy and scipy\n0.3.0\nGitHub\n\n\norgdb\nAccess OrgDB annotations\n0.0.1\nGitHub\n\n\npyBiocFileCache\nFile based cache for resources and metadata\n0.7.0\nGitHub\n\n\nrds2py\nParse and construct Python representations for datasets stored in RDS files\n0.8.0\nGitHub\n\n\nscranpy\nAnalyze multi-modal single-cell data!\n0.3.0\nGitHub\n\n\nscrnaseq\nCollection of Public Single-Cell RNA-Seq Datasets\n0.3.1\nGitHub\n\n\nsingler\nPython bindings to the singleR algorithm to annotate cell types from known references.\n0.5.0\nGitHub\n\n\ntiledbarray\nTileDb backed objects for array and matrix like data\n0.2.0\nGitHub\n\n\ntxdb\nPython interface to access and manipulate genome annotations in TxDB SQLite format.\n0.0.4\nGitHub",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  },
+  {
+    "objectID": "sections/packages.html#developer-guide",
+    "href": "sections/packages.html#developer-guide",
+    "title": "BiocPy Packages",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are interested in developing new Python packages, check out the developer guide on the phisolophy and tools we employ to ensure code quality and consistency within and across all the packages. A more detailed Python package management process is documented in the biocsetup package.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>BiocPy Packages</span>"
+    ]
+  }
+]
