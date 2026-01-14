@@ -1,0 +1,11 @@
+/.quarto/
+**/*.quarto_ipynb
+/_site/
+
+/_book/
+_freeze
+.jupyter_cache/
+
+chapters/zilinois_lung_with_celltypist/
+*whee.h5
+*.tiledb

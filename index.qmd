@@ -1,0 +1,44 @@
+# Welcome to BiocPy
+
+::: {.callout-tip}
+## Looking for the older website?
+
+A previous version of this book is published [here](https://biocpy.github.io/tutorial) and the Bioconductor workshop [here](https://biocpy.github.io/BiocWorkshop2024/) (from 2024).
+:::
+
+
+
+[BiocPy](https://github.com/biocpy/) is designed to build a bridge between the mature Bioconductor ecosystem and the Python landscape. 
+[Bioconductor](https://bioconductor.org/) is an open-source software project that provides tools for the analysis and comprehension of genomic data. 
+One of the main advantages of Bioconductor is the availability of standard data representations and large number of analysis tools tailored for genomic experiments. 
+These data structures allow researchers to seamlessly store, manipulate, and analyze data across multiple packages and workflows in R.
+
+Inspired by Bioconductor, BiocPy aims to facilitate Bioconductor workflows in Python. 
+To achieve this goal, we developed several core data structures that align closely to the Bioconductor implementations.
+By implementing these core Bioconductor data structures, BiocPy allows data to be easily interoperable between R and Python.
+
+## About this Book
+
+This book is currently in _**active development**_ and is organized into the following sections:
+
+*   **Foundations:** The core data structures that underpin the ecosystem.
+    *   [GenomicRanges](sections/foundations/genomic_ranges.qmd): Manipulation of genomic intervals.
+    *   [Data Containers](sections/foundations/data_containers.qmd): Rich semantic data containers like `SummarizedExperiment`.
+*   **BioC Hubs:** Access to Bioconductor's cloud resources.
+    *   [ExperimentHub](sections/biochubs/experimenthub.qmd): Discover and download datasets.
+    *   [AnnotationHub](sections/biochubs/annotations.qmd): Interact with gene models (`TxDb`) and organism databases (`OrgDb`).
+*   **Interoperability:** Tools to bridge R and Python.
+    *   [R Interoperability](sections/interoperability/rds2py.qmd): Read R data files (`RDS`) directly in Python.
+    *   [ArtifactDB](sections/interoperability/artifactdb.qmd): Language-agnostic storage for genomic data in R and Python.
+*   **Workflows:** Real-world usage examples.
+    *   [Single-Cell Analysis](sections/workflows/scranpy.qmd): Multi-modal single-cell analysis with `scranpy`.
+    *   [Annotation](sections/workflows/singler.qmd): Automated cell type annotation with `singler`.
+
+## Further Reading
+
+Many online resources offer detailed information on Bioconductor data structures, namely:
+
+*   [CompGenomR Book](https://compgenomr.github.io/book/)
+*   [Orchestrating Single-Cell Analysis with Bioconductor](https://www.nature.com/articles/nmeth.3252)
+*   [Orchestrating Multi-Omics Analysis with Bioconductor](https://www.nature.com/articles/s41592-019-0654-x)
+*   [EPIC-BiocIntro](https://github.com/waldronlab/EPIC-BiocIntro)

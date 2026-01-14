@@ -1,0 +1,150 @@
+---
+title: "BiocPy Packages"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code used to generate this table"
+---
+
+## Getting Started
+
+The BiocPy ecosystem is modular. You can install the collection of core packages via PyPI.
+
+### Installation
+
+To get the core data structures and utilities:
+
+```bash
+pip install biocutils genomicranges summarizedexperiment singlecellexperiment multiassayexperiment
+```
+
+To install interoperability tools:
+
+```bash
+pip install rds2py txdb orgdb experimenthub
+```
+
+
+## Core Representations
+
+These structures serve as essential and foundational data structures, acting as the building blocks for extensive and complex representations.
+
+*   **[BiocFrame](https://github.com/biocpy/biocframe)**: A Bioconductor-like data frame class.
+*   **[GenomicRanges](https://github.com/biocpy/genomicranges)**: Aids in representing genomic regions and facilitating analysis.
+
+Container classes represent single or multi-omic experimental data and metadata:
+
+*   **[SummarizedExperiment](https://github.com/biocpy/summarizedexperiment)**: Container class to represent genomic experiments.
+*   **[SingleCellExperiment](https://github.com/biocpy/singlecellexperiment)**: Container class to represent single-cell experiments.
+*   **[MultiAssayExperiment](https://github.com/biocpy/multiassayexperiment)**: Container class to represent multiple experiments and assays performed over a set of samples.
+
+Moreover, BiocPy introduces a diverse range of data type classes designed to support the representation of atomic entities, including float, string, int lists, and named lists. 
+These generics and utilities are provided through [BiocUtils](https://github.com/biocpy/biocutils) package, and the delayed 
+and file-backed array operations in the [DelayedArray](https://github.com/biocpy/delayedarray) and their derivatives ([HDF5Array](https://github.com/biocpy/hdf5array), [TileDbArray](https://github.com/biocpy/tiledbarray)).
+
+## Analysis Packages
+
+BiocPy provides bindings to libscran and various other single-cell analysis methods incorporated into the **[scranpy](sections/workflows/scranpy.qmd)** package to support analysis of multi-modal single-cell datasets. It also features integration with the **[singler](sections/workflows/singler.qmd)** algorithm to annotate cell types by matching cells to known references based on their expression profiles.
+
+## R Interoperability
+
+The **[rds2py](sections/interoperability/rds2py.qmd)** package provides bindings to the rds2cpp library. This enables direct reading of RDS files in Python, eliminating the requirement for additional data conversion tools or intermediate formats. The package’s functionality streamlines the transition between Python and R, facilitating seamless analysis.
+
+
+
+The following table serves as a directory of the core packages in the **BiocPy** ecosystem. All packages within the BiocPy ecosystem are published to [Python’s Package Index (PyPI)](https://pypi.org/org/BiocPy/).
+
+```{python}
+#| label: generate-table
+#| echo: false
+#| output: asis
+
+import requests
+import pandas as pd
+from IPython.display import display, Markdown
+
+# List of known BiocPy packages to query
+packages = [
+    "biocutils",
+    "genomicranges", 
+    "summarizedexperiment", 
+    "singlecellexperiment",
+    "multiassayexperiment",
+    "biocframe",
+    "iranges",
+    "rds2py", 
+    "scranpy",
+    "singler",
+    "celldex",
+    "scrnaseq",
+    "spatialexperiment",
+    "spatialfeatureexperiment",
+    "biocsetup",
+    "pybiocfilecache",
+    "delayedarray",
+    "hdf5array",
+    "tiledbarray",
+    "txdb",
+    "orgdb",
+    "experimenthub",
+    "mopsy",
+    "compressed-lists",
+    "biostrings"
+]
+
+table_data = []
+
+for pkg in packages:
+    try:
+        response = requests.get(f"https://pypi.org/pypi/{pkg}/json", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            info = data['info']
+            
+            name = info.get('name', pkg)
+            version = info.get('version', 'N/A')
+            summary = info.get('summary', 'No description available.')
+            home_page = info.get('home_page', '')
+            project_urls = info.get('project_urls') or {}
+            
+            doc_url = project_urls.get('Documentation') or project_urls.get('Homepage') or home_page
+            repo_url = project_urls.get('Source') or project_urls.get('Repository') or project_urls.get('Source Code')
+            
+            if not repo_url and "github.com" in home_page:
+                repo_url = home_page
+            
+            links = []
+            if repo_url:
+                links.append(f"[GitHub]({repo_url})")
+            if doc_url and doc_url != repo_url:
+                links.append(f"[Docs]({doc_url})")
+            
+            link_str = " | ".join(links) if links else "N/A"
+            
+            table_data.append({
+                "Package": f"**{name}**",
+                "Description": summary,
+                "Latest Version": f"`{version}`",
+                "Links": link_str
+            })
+    except Exception as e:
+        table_data.append({
+            "Package": pkg, 
+            "Description": "Error fetching data", 
+            "Latest Version": "N/A", 
+            "Links": ""
+        })
+
+df = pd.DataFrame(table_data)
+df = df.sort_values("Package")
+markdown_table = df.to_markdown(index=False)
+print(markdown_table)
+```
+
+---
+
+## Developer Guide
+
+If you are interested in developing new Python packages, check out the [developer guide](https://github.com/BiocPy/developer_guide) 
+on the phisolophy and tools we employ to ensure code quality and consistency within and across all the packages. 
+A more detailed Python package management process is documented in the [biocsetup package](https://biocpy.github.io/BiocSetup/tutorial.html).

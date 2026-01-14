@@ -1,0 +1,63 @@
+project:
+  type: book
+
+execute:
+  freeze: auto
+  cache: true
+
+book:
+  title: "BiocPy: Facilitate Bioconductor Workflows in Python"
+  author: "[Jayaram Kancherla](mailto:jayaram.kancherla@gmail.com)"
+  contributor: "[Aaron Lun](mailto:infinite.monkeys.with.keys@gmail.com)"
+  favicon: ./assets/short.png
+  site-url: https://biocpy.github.io/
+  date: today
+  search: true
+  repo-url: https://github.com/BiocPy/
+  # repo-actions: [issue]
+  # downloads: [pdf, epub]
+  sharing: [twitter]
+  twitter-card: true
+  cover-image: ./assets/full.png
+  page-footer:
+    center:
+      - text: "(c) BiocPy core contributors"
+        href: chapters/summary.qmd
+  sidebar:
+    style: docked
+    background: light
+  chapters:
+    - index.qmd
+    - sections/packages.qmd
+    - part: "Foundations"
+      chapters:
+        - sections/foundations/genomic_ranges.qmd
+        - sections/foundations/data_containers.qmd
+    # - section: "Access & Annotation"
+    #   contents:
+    #     - sections/annotations.qmd
+    #     - sections/hubs.qmd
+    # - section: "Interoperability"
+    #   contents:
+    #     - sections/rds2py.qmd
+    #     - sections/artifactdb.qmd
+    # - section: "Analysis Workflows"
+    #   contents:
+    #     - sections/scranpy.qmd
+    #     - sections/annotation_workflow.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    css: custom.css
+    code-overflow: wrap
+    number-sections: false
+    code-link: true
+    code-copy: true
+
+  pdf:
+    documentclass: scrreprt
