@@ -29,10 +29,10 @@ book:
   chapters:
     - index.qmd
     - sections/packages.qmd
-    - part: "Foundations"
-      chapters:
-        - sections/foundations/genomic_ranges.qmd
-        - sections/foundations/data_containers.qmd
+    # - part: "Foundations"
+    #   chapters:
+    #     - sections/foundations/genomic_ranges.qmd
+    #     - sections/foundations/data_containers.qmd
     # - section: "Access & Annotation"
     #   contents:
     #     - sections/annotations.qmd
